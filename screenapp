@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from './screens/SplashScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
+import VoiceRecognition from './screens/VoiceRecognition';  // Correct path
 
 const Stack = createStackNavigator();
 
@@ -12,6 +13,27 @@ export default function App() {
       <Stack.Navigator initialRouteName="Splash">
         <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Registration" component={RegistrationScreen} />
+        <Stack.Screen name="VoiceRecognition" component={VoiceRecognition} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import VoiceRecognitionScreen from './screens/VoiceRecognitionScreen'; // Update the path as necessary
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="VoiceRecognition">
+        <Stack.Screen 
+          name="VoiceRecognition" 
+          component={VoiceRecognitionScreen} 
+          options={{ headerShown: false }} // Hides the header for a cleaner look
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
