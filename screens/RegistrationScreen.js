@@ -12,24 +12,24 @@ const RegistrationScreen = () => {
   const [emergencyContact, setEmergencyContact] = useState('');
   const [medicalInfo, setMedicalInfo] = useState('');
   const [codeword, setCodeword] = useState('');
-  const [email, setEmail] = useState(''); // Add state for email
-  const [password, setPassword] = useState(''); // Add state for password
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const navigation = useNavigation(); // Initialize navigation
+  const navigation = useNavigation();
 
   const handleSubmit = async () => {
     if (!name || !age || !phone || !emergencyContact || !codeword || !email || !password) {
       Alert.alert('Error', 'All fields are required!');
       return;
     }
-
-    const auth = getAuth(); // Initialize Firebase Authentication
-
+  
+    const auth = getAuth();
+  
     try {
-      // Create user using Firebase Authentication
+      console.log("Registering user..."); // Debug log
       await createUserWithEmailAndPassword(auth, email, password);
-
-      // Save additional data to Firestore
+  
+      console.log("Saving data to Firestore..."); // Debug log
       await addDoc(collection(db, "users"), {
         name,
         age,
@@ -37,17 +37,18 @@ const RegistrationScreen = () => {
         emergencyContact,
         medicalInfo,
         codeword,
-        email, // Store email in Firestore as well
+        email,
         timestamp: new Date(),
       });
-
-      // Navigate to the VoiceRecognitionScreen after successful registration
-      navigation.replace('VoiceRecognition'); // Use `replace` to navigate to VoiceRecognitionScreen and remove this screen from the stack
+  
+      console.log("Navigating to VoiceRecognition..."); // Debug log
+      navigation.replace('VoiceRecognition'); // Replace current screen with VoiceRecognition
     } catch (error) {
-      console.error("Firebase Error: ", error);
-      Alert.alert('Error', 'There was an issue registering your account.');
+      console.error("Registration Error: ", error); // Debug log
+      Alert.alert('Error', 'Registration failed. Please try again.');
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -69,11 +70,11 @@ const RegistrationScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f9fafb', justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 30, fontWeight: 'bold', color: '#4B5563', marginBottom: 20, textAlign: 'center' },
-  input: { width: '80%', height: 45, borderColor: '#D1D5DB', borderWidth: 1, borderRadius: 12, marginBottom: 15, paddingLeft: 15, fontSize: 16, backgroundColor: '#ffffff' },
-  button: { width: '80%', backgroundColor: '#D1006E', borderRadius: 30, paddingVertical: 15, justifyContent: 'center', alignItems: 'center', marginTop: 20 },
-  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  container: { flex: 1, padding: 20, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 30, fontWeight: 'bold', marginBottom: 20 },
+  input: { width: '80%', height: 45, borderColor: '#ccc', borderWidth: 1, borderRadius: 8, marginBottom: 15, paddingHorizontal: 10 },
+  button: { backgroundColor: '#D1006E', padding: 15, borderRadius: 10 },
+  buttonText: { color: '#fff', fontWeight: 'bold' },
 });
 
 export default RegistrationScreen;
