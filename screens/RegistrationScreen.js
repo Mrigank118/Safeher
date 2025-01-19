@@ -41,10 +41,8 @@ const RegistrationScreen = () => {
         timestamp: new Date(),
       });
 
-      console.log(navigation); // Should print the navigation object
-
-      // Navigate to the Home screen after successful registration
-      navigation.replace('Home'); // Use `replace` to navigate to Home and remove this screen from the stack
+      // Navigate to the VoiceRecognitionScreen after successful registration
+      navigation.replace('VoiceRecognition'); // Use `replace` to navigate to VoiceRecognitionScreen and remove this screen from the stack
     } catch (error) {
       console.error("Firebase Error: ", error);
       Alert.alert('Error', 'There was an issue registering your account.');
