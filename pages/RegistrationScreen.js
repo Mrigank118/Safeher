@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Firebase Authentication
-import { db } from '../firebase'; // Firestore
-import { collection, addDoc } from "firebase/firestore"; // Firestore functions
-import { useNavigation } from '@react-navigation/native'; // Navigation
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { db } from '../firebase'; // Ensure you have a correct firebase setup
+import { collection, addDoc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
 
 const RegistrationScreen = () => {
   const [name, setName] = useState('');
@@ -22,15 +22,15 @@ const RegistrationScreen = () => {
       Alert.alert('Error', 'All fields are required!');
       return;
     }
-  
+
     const auth = getAuth();
-  
+
     try {
-      console.log("Registering user..."); // Debug log
+      console.log('Registering user...');
       await createUserWithEmailAndPassword(auth, email, password);
-  
-      console.log("Saving data to Firestore..."); // Debug log
-      await addDoc(collection(db, "users"), {
+
+      console.log('Saving data to Firestore...');
+      await addDoc(collection(db, 'users'), {
         name,
         age,
         phone,
@@ -40,15 +40,14 @@ const RegistrationScreen = () => {
         email,
         timestamp: new Date(),
       });
-  
-      console.log("Navigating to VoiceRecognition..."); // Debug log
-      navigation.replace('VoiceRecognition'); // Replace current screen with VoiceRecognition
+
+      console.log('Navigating to VoiceRecognition...');
+      navigation.replace('VoiceRecognition');
     } catch (error) {
-      console.error("Registration Error: ", error); // Debug log
+      console.error('Registration Error: ', error);
       Alert.alert('Error', 'Registration failed. Please try again.');
     }
   };
-  
 
   return (
     <View style={styles.container}>

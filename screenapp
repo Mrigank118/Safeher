@@ -1,40 +1,13 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import SplashScreen from './screens/SplashScreen';
-import RegistrationScreen from './screens/RegistrationScreen';
-import VoiceRecognition from './screens/VoiceRecognition';  // Correct path
+import { View, Text } from 'react-native';
+import { Link } from 'expo-router';
 
-const Stack = createStackNavigator();
-
-export default function App() {
+export default function Home() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Splash">
-        <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Registration" component={RegistrationScreen} />
-        <Stack.Screen name="VoiceRecognition" component={VoiceRecognition} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import VoiceRecognitionScreen from './screens/VoiceRecognitionScreen'; // Update the path as necessary
-
-const Stack = createStackNavigator();
-
-export default function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="VoiceRecognition">
-        <Stack.Screen 
-          name="VoiceRecognition" 
-          component={VoiceRecognitionScreen} 
-          options={{ headerShown: false }} // Hides the header for a cleaner look
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 24 }}>Welcome to SafeHer</Text>
+      <Link href="/register">
+        <Text style={{ color: 'blue', marginTop: 20 }}>Go to Registration</Text>
+      </Link>
+    </View>
   );
 }
