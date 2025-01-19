@@ -13,8 +13,8 @@ const SplashScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/icon.png')} style={styles.logo} />
-      <Text style={styles.appName}>Women Safety App</Text>
+      <Image source={require('../assets/images/splash-icon-woman.png')} style={styles.logo} />
+      <Text style={styles.appName}>SafeHer</Text>
     </View>
   );
 };
@@ -27,14 +27,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 450, // Increased from 150 to 250
+    height: 450, // Increased from 150 to 250
+    resizeMode: 'contain', // Ensures the image maintains aspect ratio
   },
   appName: {
-    fontSize: 24,
+    fontSize: 50, // Slightly increased text size for better balance
     fontWeight: 'bold',
     marginTop: 20,
   },
 });
+
 
 export default SplashScreen;
