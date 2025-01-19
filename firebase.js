@@ -1,23 +1,20 @@
-// firebase.js
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+// Import Firebase SDKs
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 
-// Firebase configuration (use your own credentials from Firebase Console)
+// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyDVoLggLqOfezH3O5kUrrZ5nHBOYH7Q7KI",
+  authDomain: "safeher-489de.firebaseapp.com",
+  projectId: "safeher-489de",
+  storageBucket: "safeher-489de.appspot.com",
+  messagingSenderId: "738459165140",
+  appId: "1:738459165140:web:6befeff60f344470fdb641",
+  measurementId: "G-CHHKXHYEML"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app); // Firestore database instance
 
-// Get Firestore and Auth instances
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-export { db, auth };
+export { db };
