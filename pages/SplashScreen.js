@@ -14,7 +14,7 @@ const SplashScreen = () => {
     }).start();
 
     setTimeout(() => {
-      navigation.replace('Registration');
+      navigation.replace('Welcome');
     }, 2000);
   }, [fadeAnim, navigation]);
 

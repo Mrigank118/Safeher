@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from './pages/SplashScreen';
+import Welcome from './pages/Welcome';
 import RegistrationScreen from './pages/RegistrationScreen';
 import VoiceRecognitionScreen from './pages/VoiceRecognitionScreen';
 
@@ -14,6 +15,11 @@ const App = () => {
         <Stack.Screen
           name="Splash"
           component={SplashScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Welcome"
+          component={Welcome}
           options={{ headerShown: false }}
         />
         <Stack.Screen
