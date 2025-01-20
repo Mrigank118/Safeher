@@ -11,9 +11,11 @@ const VoiceRecognitionScreen = () => {
   const [username, setUsername] = useState('');
   const [codeword, setCodeword] = useState('');
 
+  // Fetch user data and request location permissions on mount
   useEffect(() => {
-    console.log('useEffect: Fetching username and codeword from AsyncStorage...');
-    const getData = async () => {
+    console.log('useEffect: Initializing...');
+
+    const initializeData = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem('username');
         const storedCodeword = await AsyncStorage.getItem('codeword');
@@ -26,37 +28,40 @@ const VoiceRecognitionScreen = () => {
       }
     };
 
-    getData();
+    const requestLocationPermissions = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        console.log(`Location permission status: ${status}`);
 
-    console.log('useEffect: Requesting location permissions...');
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      console.log(`Location permission status: ${status}`);
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permissions are required for this app to function.');
+          console.error('Location permission denied.');
+          return;
+        }
 
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permissions are required for this app to function.');
-        console.error('Location permission denied.');
-        return;
+        fetchLocation();
+      } catch (error) {
+        console.error('Error requesting location permissions:', error);
       }
+    };
 
+    initializeData();
+    requestLocationPermissions();
+  }, []);
+
+  // Function to fetch location
+  const fetchLocation = async () => {
+    try {
       let loc = await Location.getCurrentPositionAsync({});
       console.log(`Fetched location: ${loc.coords.latitude}, ${loc.coords.longitude}`);
       setLocation(loc.coords);
-    })();
-  }, []);
-
-  const toggleListening = () => {
-    if (isListening) {
-      console.log('Stopping Speech Recognition...');
-      recognition.stop();
-      setIsListening(false);
-    } else {
-      console.log('Starting Speech Recognition...');
-      recognition.start();
-      setIsListening(true);
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      Alert.alert('Error', 'Unable to fetch location. Please enable location services.');
     }
   };
 
+  // Set up speech recognition
   useEffect(() => {
     console.log('useEffect: Initializing Speech Recognition...');
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
@@ -92,36 +97,52 @@ const VoiceRecognitionScreen = () => {
     }
   }, [codeword]);
 
+  const toggleListening = () => {
+    if (isListening) {
+      console.log('Stopping Speech Recognition...');
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      console.log('Starting Speech Recognition...');
+      recognition.start();
+      setIsListening(true);
+    }
+  };
   const sendEmergencyAlert = async () => {
     try {
-      if (!location) {
-        console.error('Cannot send alert: Location data unavailable.');
+      let currentLocation = location;
+  
+      // If location is not available, attempt to fetch it
+      if (!currentLocation) {
+        console.log('Location not available. Retrying...');
+        const fetchedLocation = await Location.getCurrentPositionAsync({});
+        console.log(`Fetched location after retry: ${fetchedLocation.coords.latitude}, ${fetchedLocation.coords.longitude}`);
+        currentLocation = fetchedLocation.coords;
+      }
+  
+      // If still no location, exit with an error
+      if (!currentLocation) {
+        console.error('Location still unavailable after retry.');
         Alert.alert('Error', 'Location data is unavailable. Please enable location services and try again.');
         return;
       }
-
-      console.log('Preparing emergency alert...');
-      const emergencyMessage = `EMERGENCY ALERT: ${username} is in danger. Location: https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-
-      // Replace with your Twilio API details
+  
+      const emergencyMessage = `EMERGENCY ALERT: ${username} is in danger. Location: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}`;
+  
       const TWILIO_ACCOUNT_SID = 'AC184abd08ee8734eda4e49b26ead7c704';
       const TWILIO_AUTH_TOKEN = '85f18fcadd57d57917ca8189adec7111';
       const TWILIO_PHONE_NUMBER = '+14066417660';
       const RECEIVER_PHONE_NUMBER = '+916392617261';
-
-      // Twilio Messaging API URL
-      const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-
-      // Twilio Calls API URL
-      const callUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`;
-
+  
       // Send SMS
+      const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+  
       const messageData = new URLSearchParams();
       messageData.append('To', RECEIVER_PHONE_NUMBER);
       messageData.append('From', TWILIO_PHONE_NUMBER);
       messageData.append('Body', emergencyMessage);
-
-      const messageResponse = await axios.post(messageUrl, messageData, {
+  
+      await axios.post(messageUrl, messageData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
           password: TWILIO_AUTH_TOKEN,
@@ -130,15 +151,17 @@ const VoiceRecognitionScreen = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-
-      console.log('SMS sent successfully:', messageResponse.data);
-
-      // Make a Voice Call
+  
+      console.log('SMS sent successfully.');
+  
+      // Make a call
+      const callUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`;
+  
       const callData = new URLSearchParams();
       callData.append('To', RECEIVER_PHONE_NUMBER);
       callData.append('From', TWILIO_PHONE_NUMBER);
-      callData.append('Url', 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical'); // Use Twilio's hosted XML for call content
-
+      callData.append('Twiml', `<Response><Say>${emergencyMessage}</Say></Response>`);
+  
       const callResponse = await axios.post(callUrl, callData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
@@ -148,15 +171,15 @@ const VoiceRecognitionScreen = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-
-      console.log('Call initiated successfully:', callResponse.data);
-      Alert.alert('Alert Sent', 'Emergency alert and call sent successfully!');
+  
+      console.log('Call placed successfully:', callResponse.data);
+      Alert.alert('Alert Sent', 'Emergency alert sent successfully!');
     } catch (error) {
       console.error('Error sending emergency alert:', error);
       Alert.alert('Error', 'Failed to send emergency alert.');
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SafeHer</Text>
