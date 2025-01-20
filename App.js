@@ -5,6 +5,7 @@ import SplashScreen from './pages/SplashScreen';
 import Welcome from './pages/Welcome';
 import RegistrationScreen from './pages/RegistrationScreen';
 import VoiceRecognitionScreen from './pages/VoiceRecognitionScreen';
+import Help from './pages/Help'; // Import the Help screen
 
 const Stack = createStackNavigator();
 
@@ -31,6 +32,11 @@ const App = () => {
           name="VoiceRecognition"
           component={VoiceRecognitionScreen}
           options={{ title: 'Voice Recognition' }}
+        />
+        <Stack.Screen
+          name="Help" 
+          component={Help}
+          options={{ title: 'Help' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

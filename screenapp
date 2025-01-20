@@ -500,3 +500,270 @@ const TWILIO_ACCOUNT_SID = 'ACf00fbc73f79d55eba225dc40d14abd3e';
 const TWILIO_AUTH_TOKEN = '7ee0e70afd067ccce8709d62680e26c2'; 
 const TWILIO_PHONE_NUMBER = '+14067197660'; 
 const EMERGENCY_CONTACT = '+919455605482'; 
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
+import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
+const VoiceRecognitionScreen = () => {
+  const [location, setLocation] = useState(null);
+  const [recognition, setRecognition] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [username, setUsername] = useState('');
+  const [codeword, setCodeword] = useState('');
+
+  // Fetch user data and request location permissions on mount
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        const storedCodeword = await AsyncStorage.getItem('codeword');
+
+        if (storedUsername) setUsername(storedUsername);
+        if (storedCodeword) setCodeword(storedCodeword);
+      } catch (error) {
+        console.error('Error fetching data from AsyncStorage:', error);
+      }
+    };
+
+    const requestLocationPermissions = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permissions are required for this app to function.');
+          return;
+        }
+
+        fetchLocation();
+      } catch (error) {
+        console.error('Error requesting location permissions:', error);
+      }
+    };
+
+    initializeData();
+    requestLocationPermissions();
+  }, []);
+
+  // Function to fetch location
+  const fetchLocation = async () => {
+    try {
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc.coords);
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      Alert.alert('Error', 'Unable to fetch location. Please enable location services.');
+    }
+  };
+
+  // Set up speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.lang = 'en-US';
+      recognitionInstance.interimResults = true;
+
+      recognitionInstance.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.trim().toLowerCase();
+
+        if (transcript.includes(codeword.toLowerCase())) {
+          sendEmergencyAlert();
+        }
+      };
+
+      recognitionInstance.onerror = (event) => {
+        Alert.alert('Error', `Speech recognition error: ${event.error}`);
+      };
+
+      recognitionInstance.onend = () => {
+        setIsListening(false);
+      };
+
+      setRecognition(recognitionInstance);
+    } else {
+      alert('Speech Recognition is not supported in your browser.');
+    }
+  }, [codeword]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      recognition.start();
+      setIsListening(true);
+    }
+  };
+
+  const sendEmergencyAlert = async () => {
+    try {
+      let currentLocation = location;
+
+      // If location is not available, attempt to fetch it
+      if (!currentLocation) {
+        const fetchedLocation = await Location.getCurrentPositionAsync({});
+        currentLocation = fetchedLocation.coords;
+      }
+
+      if (!currentLocation) {
+        Alert.alert('Error', 'Location data is unavailable. Please enable location services and try again.');
+        return;
+      }
+
+      const emergencyMessage = `EMERGENCY ALERT: ${username} is in danger. Location: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}`;
+
+      const TWILIO_ACCOUNT_SID = 'YOUR_ACCOUNT_SID';
+      const TWILIO_AUTH_TOKEN = 'YOUR_AUTH_TOKEN';
+      const TWILIO_PHONE_NUMBER = 'YOUR_TWILIO_PHONE_NUMBER';
+      const RECEIVER_PHONE_NUMBER = 'RECEIVER_PHONE_NUMBER';
+
+      // Send SMS
+      const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+
+      const messageData = new URLSearchParams();
+      messageData.append('To', RECEIVER_PHONE_NUMBER);
+      messageData.append('From', TWILIO_PHONE_NUMBER);
+      messageData.append('Body', emergencyMessage);
+
+      await axios.post(messageUrl, messageData, {
+        auth: {
+          username: TWILIO_ACCOUNT_SID,
+          password: TWILIO_AUTH_TOKEN,
+        },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      Alert.alert('Alert Sent', 'Emergency alert sent successfully!');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send emergency alert.');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>SafeHer</Text>
+      <Text style={styles.username}>Welcome, {username}</Text>
+      <Text style={styles.codeword}>Codeword: {codeword}</Text>
+
+      <TouchableOpacity
+        style={[styles.sosButton, isListening ? styles.listening : null]}
+        onPress={toggleListening}
+      >
+        <Text style={styles.sosButtonText}>
+          {isListening ? 'Stop Listening' : 'Start Listening'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.sosButton} onPress={sendEmergencyAlert}>
+        <Text style={styles.sosButtonText}>SOS</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.location}>
+        {location ? `Current Location: ${location.latitude}, ${location.longitude}` : 'Fetching location...'}
+      </Text>
+
+      <Text style={styles.listeningStatus}>
+        {isListening ? 'Listening for codeword...' : 'Not listening.'}
+      </Text>
+
+      {/* Icon tray at the bottom */}
+      <View style={styles.iconTray}>
+        <TouchableOpacity style={styles.iconButton}>
+          <Image source={require('./assets/mic.png')} style={styles.iconImage} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton}>
+          <Image source={require('./assets/gps.png')} style={styles.iconImage} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton}>
+          <Image source={require('./assets/question.png')} style={styles.iconImage} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.iconButton}>
+          <Image source={require('./assets/phone-call.png')} style={styles.iconImage} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  username: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555',
+  },
+  codeword: {
+    fontSize: 16,
+    color: '#777',
+    marginTop: 10,
+  },
+  sosButton: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: '#e91e63',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 30,
+    shadowColor: '#e91e63',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+  },
+  sosButtonText: {
+    fontSize: 20,
+    color: '#fff',
+  },
+  listening: {
+    backgroundColor: '#4caf50',
+  },
+  location: {
+    fontSize: 16,
+    color: 'gray',
+    marginTop: 20,
+  },
+  listeningStatus: {
+    fontSize: 16,
+    color: '#777',
+    marginTop: 10,
+  },
+  iconTray: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 10,
+    position: 'absolute',
+    bottom: 20,
+  },
+  iconButton: {
+    width: 80,
+    height: 80,
+    borderRadius : 100,
+    backgroundColor: '#e91e63',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconImage: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+  },
+});
+
+export default VoiceRecognitionScreen;

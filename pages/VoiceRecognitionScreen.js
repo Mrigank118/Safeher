@@ -1,44 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios'; // For making API requests
+import axios from 'axios';
+import { Audio } from 'expo-av';
 
-const VoiceRecognitionScreen = () => {
+const VoiceRecognitionScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [recognition, setRecognition] = useState(null);
   const [isListening, setIsListening] = useState(false);
-  const [username, setUsername] = useState('');
-  const [codeword, setCodeword] = useState('');
+  const [username, setUsername] = useState('Loading...');
+  const [codeword, setCodeword] = useState('Loading...');
+  const [sound, setSound] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Fetch user data and request location permissions on mount
   useEffect(() => {
-    console.log('useEffect: Initializing...');
-
     const initializeData = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem('username');
         const storedCodeword = await AsyncStorage.getItem('codeword');
-        console.log(`Fetched username: ${storedUsername}, codeword: ${storedCodeword}`);
 
-        if (storedUsername) setUsername(storedUsername);
-        if (storedCodeword) setCodeword(storedCodeword);
+        setUsername(storedUsername || 'Guest');
+        setCodeword(storedCodeword || 'Not Set');
       } catch (error) {
         console.error('Error fetching data from AsyncStorage:', error);
+        setUsername('Error');
+        setCodeword('Error');
       }
     };
 
     const requestLocationPermissions = async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
-        console.log(`Location permission status: ${status}`);
-
         if (status !== 'granted') {
           Alert.alert('Permission Denied', 'Location permissions are required for this app to function.');
-          console.error('Location permission denied.');
           return;
         }
-
         fetchLocation();
       } catch (error) {
         console.error('Error requesting location permissions:', error);
@@ -49,11 +46,38 @@ const VoiceRecognitionScreen = () => {
     requestLocationPermissions();
   }, []);
 
-  // Function to fetch location
+  const toggleRingtone = async () => {
+    try {
+      if (isPlaying) {
+        await sound.stopAsync();
+        setIsPlaying(false);
+      } else {
+        if (!sound) {
+          const { sound: newSound } = await Audio.Sound.createAsync(require('./assets/one_plus_ringtone.mp3'));
+          setSound(newSound);
+          await newSound.playAsync();
+          setIsPlaying(true);
+        } else {
+          await sound.playAsync();
+          setIsPlaying(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error playing ringtone:', error);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
+
   const fetchLocation = async () => {
     try {
       let loc = await Location.getCurrentPositionAsync({});
-      console.log(`Fetched location: ${loc.coords.latitude}, ${loc.coords.longitude}`);
       setLocation(loc.coords);
     } catch (error) {
       console.error('Error fetching location:', error);
@@ -61,9 +85,7 @@ const VoiceRecognitionScreen = () => {
     }
   };
 
-  // Set up speech recognition
   useEffect(() => {
-    console.log('useEffect: Initializing Speech Recognition...');
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognitionInstance = new SpeechRecognition();
@@ -72,10 +94,7 @@ const VoiceRecognitionScreen = () => {
 
       recognitionInstance.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim().toLowerCase();
-        console.log(`Speech Recognition Result: ${transcript}`);
-
         if (transcript.includes(codeword.toLowerCase())) {
-          console.log(`${codeword} detected! Triggering emergency alert...`);
           sendEmergencyAlert();
         }
       };
@@ -86,12 +105,10 @@ const VoiceRecognitionScreen = () => {
       };
 
       recognitionInstance.onend = () => {
-        console.log('Speech Recognition ended.');
         setIsListening(false);
       };
 
       setRecognition(recognitionInstance);
-      console.log('Speech Recognition Initialized. Ready to start...');
     } else {
       alert('Speech Recognition is not supported in your browser.');
     }
@@ -99,49 +116,37 @@ const VoiceRecognitionScreen = () => {
 
   const toggleListening = () => {
     if (isListening) {
-      console.log('Stopping Speech Recognition...');
       recognition.stop();
       setIsListening(false);
     } else {
-      console.log('Starting Speech Recognition...');
       recognition.start();
       setIsListening(true);
     }
   };
+
   const sendEmergencyAlert = async () => {
     try {
       let currentLocation = location;
-  
-      // If location is not available, attempt to fetch it
+
       if (!currentLocation) {
-        console.log('Location not available. Retrying...');
         const fetchedLocation = await Location.getCurrentPositionAsync({});
-        console.log(`Fetched location after retry: ${fetchedLocation.coords.latitude}, ${fetchedLocation.coords.longitude}`);
         currentLocation = fetchedLocation.coords;
       }
-  
-      // If still no location, exit with an error
-      if (!currentLocation) {
-        console.error('Location still unavailable after retry.');
-        Alert.alert('Error', 'Location data is unavailable. Please enable location services and try again.');
-        return;
-      }
-  
+
       const emergencyMessage = `EMERGENCY ALERT: ${username} is in danger. Location: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}`;
-  
-      const TWILIO_ACCOUNT_SID = 'AC184abd08ee8734eda4e49b26ead7c704';
-      const TWILIO_AUTH_TOKEN = '85f18fcadd57d57917ca8189adec7111';
-      const TWILIO_PHONE_NUMBER = '+14066417660';
-      const RECEIVER_PHONE_NUMBER = '+916392617261';
-  
-      // Send SMS
+
+      const TWILIO_ACCOUNT_SID = 'ACd9a525e3d46a318e20264df2fc9d7291';
+      const TWILIO_AUTH_TOKEN = '93375d0df340a400bfb4edd9369d6ec8';
+      const TWILIO_PHONE_NUMBER = '+16203191461';
+      const RECEIVER_PHONE_NUMBER = '+918009960450';
+
       const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-  
+
       const messageData = new URLSearchParams();
       messageData.append('To', RECEIVER_PHONE_NUMBER);
       messageData.append('From', TWILIO_PHONE_NUMBER);
       messageData.append('Body', emergencyMessage);
-  
+
       await axios.post(messageUrl, messageData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
@@ -151,18 +156,15 @@ const VoiceRecognitionScreen = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-  
-      console.log('SMS sent successfully.');
-  
-      // Make a call
+
       const callUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`;
-  
+
       const callData = new URLSearchParams();
       callData.append('To', RECEIVER_PHONE_NUMBER);
       callData.append('From', TWILIO_PHONE_NUMBER);
       callData.append('Twiml', `<Response><Say>${emergencyMessage}</Say></Response>`);
-  
-      const callResponse = await axios.post(callUrl, callData, {
+
+      await axios.post(callUrl, callData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
           password: TWILIO_AUTH_TOKEN,
@@ -171,41 +173,52 @@ const VoiceRecognitionScreen = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-  
-      console.log('Call placed successfully:', callResponse.data);
+
       Alert.alert('Alert Sent', 'Emergency alert sent successfully!');
     } catch (error) {
       console.error('Error sending emergency alert:', error);
       Alert.alert('Error', 'Failed to send emergency alert.');
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SafeHer</Text>
-      <Text style={styles.username}>Welcome, {username}</Text>
-      <Text style={styles.codeword}>Codeword: {codeword}</Text>
-
-      <TouchableOpacity
-        style={[styles.sosButton, isListening ? styles.listening : null]}
-        onPress={toggleListening}
-      >
-        <Text style={styles.sosButtonText}>
-          {isListening ? 'Stop Listening' : 'Start Listening'}
-        </Text>
-      </TouchableOpacity>
-
+      <Text style={styles.username}>
+        Welcome, {username ? username : 'Guest'}
+      </Text>
+      <Text style={styles.codeword}>
+        Codeword: {codeword ? codeword : 'Not Set'}
+      </Text>
       <TouchableOpacity style={styles.sosButton} onPress={sendEmergencyAlert}>
-        <Text style={styles.sosButtonText}>SOS</Text>
+        <Image source={require('./assets/sos.png')} style={styles.sosIcon} />
       </TouchableOpacity>
-
       <Text style={styles.location}>
         {location ? `Current Location: ${location.latitude}, ${location.longitude}` : 'Fetching location...'}
       </Text>
-
       <Text style={styles.listeningStatus}>
         {isListening ? 'Listening for codeword...' : 'Not listening.'}
       </Text>
+      <View style={styles.tray}>
+        <TouchableOpacity style={styles.trayButton} onPress={toggleListening}>
+          <Image
+            source={require('./assets/mic.png')}
+            style={[styles.trayIcon, isListening && { tintColor: '#4caf50' }]}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.trayButton}>
+          <Image source={require('./assets/gps.png')} style={styles.trayIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.trayButton} onPress={toggleRingtone}>
+          <Image
+            source={require('./assets/phone-call.png')}
+            style={[styles.trayIcon, isPlaying && { tintColor: '#4caf50' }]}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.trayButton} onPress={() => navigation.navigate('Help')}>
+          <Image source={require('./assets/question.png')} style={styles.trayIcon} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -246,12 +259,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 15,
   },
-  sosButtonText: {
-    fontSize: 20,
-    color: '#fff',
-  },
-  listening: {
-    backgroundColor: '#4caf50', // Green when listening
+  sosIcon: {
+    width: 90,
+    height: 90,
+    tintColor: '#fff',
   },
   location: {
     fontSize: 16,
@@ -262,6 +273,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#777',
     marginTop: 10,
+  },
+  tray: {
+    position: 'absolute',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  trayButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 30,
+    backgroundColor: '#e91e63',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 10,
+  },
+  trayIcon: {
+    width: 20,
+    height: 30,
+    tintColor: '#fff',
   },
 });
 
