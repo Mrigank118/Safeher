@@ -4,6 +4,8 @@ import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Audio } from 'expo-av';
+import { Linking } from 'react-native';
+
 
 const VoiceRecognitionScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
@@ -206,9 +208,20 @@ const VoiceRecognitionScreen = ({ navigation }) => {
             style={[styles.trayIcon, isListening && { tintColor: '#4caf50' }]}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.trayButton}>
-          <Image source={require('./assets/gps.png')} style={styles.trayIcon} />
-        </TouchableOpacity>
+        <TouchableOpacity
+  style={styles.trayButton}
+  onPress={() => {
+    if (location) {
+      const locationUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
+      Linking.openURL(locationUrl).catch(err => console.error('Error opening map:', err));
+    } else {
+      Alert.alert('Location not available', 'Unable to open map. Please wait for location to be fetched.');
+    }
+  }}
+>
+  <Image source={require('./assets/gps.png')} style={styles.trayIcon} />
+</TouchableOpacity>
+
         <TouchableOpacity style={styles.trayButton} onPress={toggleRingtone}>
           <Image
             source={require('./assets/phone-call.png')}

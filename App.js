@@ -7,6 +7,7 @@ import RegistrationScreen from './pages/RegistrationScreen';
 import VoiceRecognitionScreen from './pages/VoiceRecognitionScreen';
 import Help from './pages/Help'; // Import the Help screen
 
+
 const Stack = createStackNavigator();
 
 const App = () => {
