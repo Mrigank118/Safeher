@@ -4,21 +4,21 @@ import Animated, { FadeIn, FadeOut, SlideInLeft, SlideInRight } from "react-nati
 import { useNavigation } from '@react-navigation/native';  // Import useNavigation hook
 
 const tiles = [
-  { 
-    img: require('./assets/calling.png'), 
-    text: "SafeHer provides real-time assistance during emergencies with features like predefined contact calls, alerting authorities, and sending location updates to ensure your safety at all times." 
+  {
+    img: require('./assets/calling.png'),
+    text: "SafeHer provides real-time assistance during emergencies with features like predefined contact calls, alerting authorities, and sending location updates to ensure your safety at all times."
   },
-  { 
-    img: require('./assets/danger.png'), 
-    text: "Quickly send emergency alerts with just one tap. The app connects directly to emergency services and shares your real-time location to minimize response time." 
+  {
+    img: require('./assets/danger.png'),
+    text: "Quickly send emergency alerts with just one tap. The app connects directly to emergency services and shares your real-time location to minimize response time."
   },
-  { 
-    img: require('./assets/splash-icon-woman.png'), 
-    text: "SafeHer offers an intuitive interface with features like GPS tracking, safe route planning, and sharing your location with trusted contacts for enhanced security." 
+  {
+    img: require('./assets/splash-icon-woman.png'),
+    text: "SafeHer offers an intuitive interface with features like GPS tracking, safe route planning, and sharing your location with trusted contacts for enhanced security."
   },
-  { 
-    img: require('./assets/QR.png'), 
-    text: "Download SafeHer now by scanning the QR code and stay prepared for emergencies. Access essential safety features with just one tap." 
+  {
+    img: require('./assets/QR.png'),
+    text: "Download SafeHer now by scanning the QR code and stay prepared for emergencies. Access essential safety features with just one tap."
   },
 ];
 
@@ -30,7 +30,7 @@ const Welcome = () => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {/* Heading Section */}
-        <Animated.View 
+        <Animated.View
           style={styles.headingContainer}
           entering={FadeIn.duration(500)}
           exiting={FadeOut.duration(300)}
@@ -38,12 +38,12 @@ const Welcome = () => {
           <Text style={styles.headingText}>SafeHer</Text>
           <Text style={styles.subheadingText}>Your Safety, Our Priority</Text>
         </Animated.View>
-        
+
         {/* Tile Section */}
         <View style={styles.tileContainer}>
           {tiles.map((tile, index) => (
-            <Animated.View 
-              key={index} 
+            <Animated.View
+              key={index}
               style={[styles.tile, index % 2 === 0 ? styles.tileRow : styles.tileRowReverse]}
               entering={index % 2 === 0 ? SlideInLeft.delay(index * 200) : SlideInRight.delay(index * 200)}
               exiting={FadeOut.duration(300)}
@@ -55,30 +55,31 @@ const Welcome = () => {
         </View>
 
         {/* Register Button */}
-        <Animated.View 
+        <Animated.View
           style={styles.registerButtonContainer}
           entering={SlideInLeft.duration(700)}
           exiting={FadeOut.duration(300)}
         >
-        <TouchableOpacity
-  style={[
-    styles.registerButton,
-    isPressed && styles.registerButtonPressed, // Apply pressed effect
-  ]}
-  onPressIn={() => setIsPressed(true)} // Start press effect
-  onPressOut={() => setIsPressed(false)} // End press effect
-  onPress={() => {
-    // Navigate to Registration Screen
-    navigation.navigate('Registration');  // Use the correct screen name
-  }}
->
-  <Text style={styles.registerButtonText}>Register Now</Text>
-</TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.registerButton,
+              isPressed && styles.registerButtonPressed, // Apply pressed effect
+            ]}
+            onPressIn={() => setIsPressed(true)} // Start press effect
+            onPressOut={() => setIsPressed(false)} // End press effect
+            onPress={() => {
+              // Navigate to Terms Screen
+              navigation.navigate('Terms');  // Update to point to Terms.js
+            }}
+          >
+            <Text style={styles.registerButtonText}>Terms & Conditions</Text>
+          </TouchableOpacity>
+
 
         </Animated.View>
 
         {/* Footer Section */}
-        <Animated.View 
+        <Animated.View
           style={styles.footerContainer}
           entering={FadeIn.duration(500)}
           exiting={FadeOut.duration(300)}
