@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Audio } from 'expo-av';
 import { Linking } from 'react-native';
+import { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, RECEIVER_PHONE_NUMBER } from '@env';
 
 
 const VoiceRecognitionScreen = ({ navigation }) => {
@@ -129,26 +130,21 @@ const VoiceRecognitionScreen = ({ navigation }) => {
   const sendEmergencyAlert = async () => {
     try {
       let currentLocation = location;
-
+  
       if (!currentLocation) {
         const fetchedLocation = await Location.getCurrentPositionAsync({});
         currentLocation = fetchedLocation.coords;
       }
-
+  
       const emergencyMessage = `EMERGENCY ALERT: ${username} is in danger. Location: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}`;
-
-      const TWILIO_ACCOUNT_SID = 'ACd45a6fbe7f51a82baf051d8a9d25c82d';
-      const TWILIO_AUTH_TOKEN = 'f307ac4e8e221dac25a79de3abf9cbe7';
-      const TWILIO_PHONE_NUMBER = '+18483710049';
-      const RECEIVER_PHONE_NUMBER = '+916392617261';
-
+  
       const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-
+  
       const messageData = new URLSearchParams();
       messageData.append('To', RECEIVER_PHONE_NUMBER);
       messageData.append('From', TWILIO_PHONE_NUMBER);
       messageData.append('Body', emergencyMessage);
-
+  
       await axios.post(messageUrl, messageData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
@@ -158,14 +154,14 @@ const VoiceRecognitionScreen = ({ navigation }) => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-
+  
       const callUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`;
-
+  
       const callData = new URLSearchParams();
       callData.append('To', RECEIVER_PHONE_NUMBER);
       callData.append('From', TWILIO_PHONE_NUMBER);
       callData.append('Twiml', `<Response><Say>${emergencyMessage}</Say></Response>`);
-
+  
       await axios.post(callUrl, callData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
@@ -175,13 +171,14 @@ const VoiceRecognitionScreen = ({ navigation }) => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-
+  
       Alert.alert('Alert Sent', 'Emergency alert sent successfully!');
     } catch (error) {
       console.error('Error sending emergency alert:', error);
       Alert.alert('Error', 'Failed to send emergency alert.');
     }
   };
+  
 
   return (
     <View style={styles.container}>
