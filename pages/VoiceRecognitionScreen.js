@@ -130,21 +130,21 @@ const VoiceRecognitionScreen = ({ navigation }) => {
   const sendEmergencyAlert = async () => {
     try {
       let currentLocation = location;
-  
+
       if (!currentLocation) {
         const fetchedLocation = await Location.getCurrentPositionAsync({});
         currentLocation = fetchedLocation.coords;
       }
-  
+
       const emergencyMessage = `EMERGENCY ALERT: ${username} is in danger. Location: https://www.google.com/maps?q=${currentLocation.latitude},${currentLocation.longitude}`;
-  
+
       const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-  
+
       const messageData = new URLSearchParams();
       messageData.append('To', RECEIVER_PHONE_NUMBER);
       messageData.append('From', TWILIO_PHONE_NUMBER);
       messageData.append('Body', emergencyMessage);
-  
+
       await axios.post(messageUrl, messageData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
@@ -154,14 +154,14 @@ const VoiceRecognitionScreen = ({ navigation }) => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-  
+
       const callUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`;
-  
+
       const callData = new URLSearchParams();
       callData.append('To', RECEIVER_PHONE_NUMBER);
       callData.append('From', TWILIO_PHONE_NUMBER);
       callData.append('Twiml', `<Response><Say>${emergencyMessage}</Say></Response>`);
-  
+
       await axios.post(callUrl, callData, {
         auth: {
           username: TWILIO_ACCOUNT_SID,
@@ -171,14 +171,14 @@ const VoiceRecognitionScreen = ({ navigation }) => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-  
+
       Alert.alert('Alert Sent', 'Emergency alert sent successfully!');
     } catch (error) {
       console.error('Error sending emergency alert:', error);
       Alert.alert('Error', 'Failed to send emergency alert.');
     }
   };
-  
+
 
   return (
     <View style={styles.container}>
@@ -206,18 +206,20 @@ const VoiceRecognitionScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-  style={styles.trayButton}
-  onPress={() => {
-    if (location) {
-      const locationUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-      Linking.openURL(locationUrl).catch(err => console.error('Error opening map:', err));
-    } else {
-      Alert.alert('Location not available', 'Unable to open map. Please wait for location to be fetched.');
-    }
-  }}
->
-  <Image source={require('./assets/gps.png')} style={styles.trayIcon} />
-</TouchableOpacity>
+          style={styles.trayButton}
+          onPress={() => {
+            if (location) {
+              const searchQuery = 'police station OR hospital';
+              const locationUrl = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}/@${location.latitude},${location.longitude},15z`;
+              Linking.openURL(locationUrl).catch(err => console.error('Error opening map:', err));
+            } else {
+              Alert.alert('Location not available', 'Unable to open map. Please wait for location to be fetched.');
+            }
+          }}
+        >
+          <Image source={require('./assets/gps.png')} style={styles.trayIcon} />
+        </TouchableOpacity>
+
 
         <TouchableOpacity style={styles.trayButton} onPress={toggleRingtone}>
           <Image
