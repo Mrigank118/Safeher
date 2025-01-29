@@ -5,8 +5,8 @@ import SplashScreen from './pages/SplashScreen';
 import Welcome from './pages/Welcome';
 import RegistrationScreen from './pages/RegistrationScreen';
 import VoiceRecognitionScreen from './pages/VoiceRecognitionScreen';
-import Help from './pages/Help'; // Import the Help screen
-
+import Help from './pages/Help';
+import Terms from './pages/Terms'; // Import the Terms & Conditions screen
 
 const Stack = createStackNavigator();
 
@@ -27,17 +27,42 @@ const App = () => {
         <Stack.Screen
           name="Registration"
           component={RegistrationScreen}
-          options={{ title: 'Register' }}
+          options={{
+            title: 'Register',
+            headerStyle: { backgroundColor: '#ff69b4' },
+            headerTintColor: '#fff',
+            headerTitleAlign: 'center',
+          }}
         />
         <Stack.Screen
           name="VoiceRecognition"
           component={VoiceRecognitionScreen}
-          options={{ title: 'Voice Recognition' }}
+          options={{
+            title: 'Voice Recognition',
+            headerStyle: { backgroundColor: '#ff69b4' },
+            headerTintColor: '#fff',
+            headerTitleAlign: 'center',
+          }}
         />
         <Stack.Screen
-          name="Help" 
+          name="Help"
           component={Help}
-          options={{ title: 'Help' }}
+          options={{
+            title: 'Help',
+            headerStyle: { backgroundColor: '#ff69b4' },
+            headerTintColor: '#fff',
+            headerTitleAlign: 'center',
+          }}
+        />
+        <Stack.Screen
+          name="Terms"
+          component={Terms}
+          options={{
+            title: 'Terms & Conditions',
+            headerStyle: { backgroundColor: '#ff69b4' },
+            headerTintColor: '#fff',
+            headerTitleAlign: 'center',
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
