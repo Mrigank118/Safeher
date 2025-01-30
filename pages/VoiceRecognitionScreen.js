@@ -295,9 +295,54 @@ const VoiceRecognitionScreen = ({ navigation }) => {
   
       console.log(`Live location message sent to ${RECEIVER_PHONE_NUMBER}`);
       Alert.alert('Sent', 'Live location update sent successfully!');
+  
+      // Start a timer to stop tracking after 20 minutes
+      setTimeout(() => {
+        stopLiveLocationSharing();
+      }, 20 * 60 * 1000); // 20 minutes in milliseconds
+  
     } catch (error) {
       console.error('Error sending live location update:', error);
       Alert.alert('Error', 'Failed to send live location update.');
+    }
+  };
+  
+  const stopLiveLocationSharing = async () => {
+    try {
+      if (!RECEIVER_PHONE_NUMBER) {
+        console.warn('Receiver phone number is not defined.');
+        Alert.alert('Error', 'Receiver phone number is not set.');
+        return;
+      }
+  
+      // Notify the receiver that tracking has stopped
+      const stopMessage = `Alert: Live location tracking has been stopped.`;
+      
+      const messageUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+      
+      const messageData = new URLSearchParams();
+      messageData.append('To', RECEIVER_PHONE_NUMBER);
+      messageData.append('From', TWILIO_PHONE_NUMBER);
+      messageData.append('Body', stopMessage);
+  
+      await axios.post(messageUrl, messageData, {
+        auth: {
+          username: TWILIO_ACCOUNT_SID,
+          password: TWILIO_AUTH_TOKEN,
+        },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+  
+      // Clear the stored location state
+      setLocation(null);
+      console.log('Live location sharing stopped.');
+      
+      Alert.alert('Stopped', 'Live location sharing has been stopped.');
+    } catch (error) {
+      console.error('Error stopping live location sharing:', error);
+      Alert.alert('Error', 'Failed to stop live location sharing.');
     }
   };
   
