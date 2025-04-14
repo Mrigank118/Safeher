@@ -71,8 +71,73 @@ Ensure the following are installed on your machine:
 
 ---
 
-### 📥 Step 1: Clone the Repository
+Sure! Here’s the **complete installation section in raw text** that you can copy and paste directly into your `README.md`:
+
+```txt
+🚀 Installation & Setup
+
+📥 Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/women-safety-app.git
 cd women-safety-app
+```
+
+📦 Step 2: Install Dependencies
+
+```bash
+npm install
+```
+
+🛠️ Step 3: Install Expo CLI Globally (if not already installed)
+
+```bash
+npm install -g expo-cli
+```
+
+🔐 Step 4: Add Environment Variables
+
+Create a `.env` file in the root of the project and add the following:
+
+```env
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
+FIREBASE_API_KEY=your_firebase_api_key
+FIREBASE_AUTH_DOMAIN=your_auth_domain
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_storage_bucket
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+```
+
+> 🛡️ **Keep your `.env` file secure. Do not commit it to version control.**
+
+📱 Step 5: Start the Expo Development Server
+
+```bash
+npx expo start
+```
+
+This will:
+
+- Open **Expo Dev Tools** in your browser  
+- Show a **QR code** in the terminal
+
+📲 Step 6: Run on Device
+
+- Download **Expo Go** app from the App Store or Google Play  
+- Open **Expo Go** and **scan the QR code** from the terminal/browser  
+
+> 🔁 Changes made to the code will **hot-reload** on your device instantly.
+
+🧪 Optional: Run on Emulator
+
+```bash
+npx expo run:android
+# or
+npx expo run:ios
+```
+
+> Make sure your emulator is running **before** executing the command. And both the Devices are Connected to the same Network 
