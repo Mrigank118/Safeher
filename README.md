@@ -2,42 +2,77 @@
 
 A **community-powered** women safety app that detects emergencies through **voice-recognized codewords** and alerts **nearby users** to assist in real-time.
 
+---
+
+![App Preview](safeHerPreview.png)
+
+---
+
 ## ✨ Features
 
-- **🎙️ Codeword-Based Emergency Trigger** – Detects distress codewords in the background and triggers alerts.
-- **📍 Real-Time Location Sharing** – Sends **live location** to emergency contacts & nearby responders.
-- **⚠️ Community SOS Alerts** – Notifies **nearby registered users** within a configurable radius (500m–1km).
-- **🗺️ Safety Map & Heatmaps** – Highlights safe zones & high-risk areas based on community reports.
-- **🛡️ AI & Security** – **NLP & Sentiment Analysis** to prevent false triggers, **end-to-end encryption** for privacy.
+- 🎙️ **Codeword-Based Emergency Trigger**  
+  Detects distress codewords in the background and automatically triggers alerts.
+
+- 📍 **Real-Time Location Sharing**  
+  Sends **live location** to emergency contacts and **nearby responders**.
+
+- ⚠️ **Community SOS Alerts**  
+  Notifies **registered users** within a configurable radius (500m–1km).
+
+- 🗺️ **Safety Map & Heatmaps**  
+  Highlights safe zones and high-risk areas based on real-time community data.
+
+- 🛡️ **AI & Security Suite**  
+  Includes **NLP & Sentiment Analysis** to reduce false triggers and **end-to-end encryption** for privacy protection.
+
+---
 
 ## 🏗️ Tech Stack
 
 ### 📱 Frontend
-- **React Native (Expo Go)** – Cross-platform mobile app development.
-- **Tailwind CSS** – Responsive UI design.
-- **React Navigation** – Seamless in-app navigation.
-- **React Native Background Service** – Codeword recognition.
+
+- **React Native (Expo Go)** – Cross-platform mobile development
+- **Tailwind CSS** – Utility-first responsive UI styling
+- **React Navigation** – Smooth and intuitive navigation
+- **React Native Background Service** – Runs codeword recognition in the background
 
 ### 🖥️ Backend
-- **Firebase Firestore** – Real-time database.
-- **Firebase Authentication** – Secure user login.
+
+- **Firebase Firestore** – Real-time NoSQL database
+- **Firebase Authentication** – Secure user authentication
 
 ### 🔗 APIs & Services
-- **Twilio API** – Emergency **calls & SMS**.
-- **Google Maps API** – Live location tracking & safety zones.
-- **WebSockets** – Real-time community alerts.
-- **Firebase Cloud Messaging** – Push notifications.
+
+- **Twilio API** – Emergency **calls & SMS** notifications
+- **Google Maps API** – Live location tracking and rendering safety zones
+- **WebSockets** – Enables real-time community alerting
+- **Firebase Cloud Messaging (FCM)** – Push notification delivery
 
 ### 🧠 AI & Security
-- **Voice Recognition** – Detects codewords in real-time.
-- **NLP for Emergency Detection** – Filters false triggers.
-- **Sentiment Analysis** – Detects panic in voice.
-- **Predictive Safety Alerts** – AI-based high-risk area detection.
-- **End-to-End Encryption** – Secures chat & location sharing.
+
+- **Voice Recognition** – Recognizes distress codewords in real-time
+- **NLP for Emergency Detection** – Avoids false triggers using natural language processing
+- **Sentiment Analysis** – Analyzes voice tone for panic detection
+- **Predictive Safety Alerts** – AI-driven high-risk area forecasting
+- **End-to-End Encryption** – Ensures privacy of chat and location sharing
+
+---
 
 ## 🚀 Installation & Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/women-safety-app.git
-   cd women-safety-app
+### 📦 Prerequisites
+
+Ensure the following are installed on your machine:
+
+- [Node.js (v14+)](https://nodejs.org/en/download/)
+- [Git](https://git-scm.com/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- Android or iOS device with the **Expo Go** app from the app store
+
+---
+
+### 📥 Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/your-username/women-safety-app.git
+cd women-safety-app
